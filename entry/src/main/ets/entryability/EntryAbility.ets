@@ -1,6 +1,9 @@
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { window } from '@kit.ArkUI';
+import { KeyboardAvoidMode, window } from '@kit.ArkUI';
+import { WeChatStore } from '../utils/chat_store';
+import { UserInfoModel } from '../models/user';
+import { WeChat_CurrentUserKey } from '../constants';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -11,15 +14,22 @@ export default class EntryAbility extends UIAbility {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onDestroy');
   }
 
-  onWindowStageCreate(windowStage: window.WindowStage): void {
+  async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
     // Main window is created, set main page for this ability
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
+    WeChatStore.context = this.context
+    const currentUser = WeChatStore.getCurrentUser()
+    AppStorage.setOrCreate<UserInfoModel>(WeChat_CurrentUserKey, currentUser)
 
-    windowStage.loadContent('pages/Index', (err) => {
+    windowStage.loadContent('pages/Index', async (err) => {
       if (err.code) {
         hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
         return;
       }
+      // 键盘避让
+      const win = await windowStage.getMainWindow()
+      win.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
+
       hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
     });
   }
