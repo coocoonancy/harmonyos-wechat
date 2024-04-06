@@ -1,5 +1,6 @@
 import Connect from '../components/Connect/Connect';
 import { TabBarClass } from '../models/tab';
+import WeChat from './WeChat/WeChat';
 
 @Entry
 @Component
@@ -48,6 +49,8 @@ struct Index {
         TabContent() {
           if (item.name === 'connect') {
             Connect()
+          } else if (item.name === 'wechat') {
+            WeChat()
           } else {
             Text(item.title)
           }

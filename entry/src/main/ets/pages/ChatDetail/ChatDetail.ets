@@ -61,6 +61,14 @@ struct ChatDetail {
     this.scroller.scrollEdge(Edge.Bottom)
   }
 
+  delMessage(messId: string) {
+    const index = this.messList.findIndex(item => item.id === messId)
+    if (index > -1) {
+      this.messList.splice(index, 1)
+      WeChatStore.delOneWeChatMessage(this.talkUser.user_id, messId)
+    }
+  }
+
   build() {
     Column() {
       Stack({
@@ -89,7 +97,11 @@ struct ChatDetail {
       List({ space: 20, scroller: this.scroller }) {
         ForEach(this.messList, (item: MessageInfoModel) => {
           ListItem() {
-            Message({ currentMessage: item })
+            Message({
+              currentMessage: item, delMessage: () => {
+                this.delMessage(item.id)
+              }
+            })
           }
         })
       }
@@ -99,6 +111,9 @@ struct ChatDetail {
         bottom: 10
       })
       .backgroundColor($r("app.color.back_color"))
+      .onAppear(() => {
+        this.scroller.scrollEdge(Edge.Bottom)
+      })
 
       // 底部内容
       BottomInput({
