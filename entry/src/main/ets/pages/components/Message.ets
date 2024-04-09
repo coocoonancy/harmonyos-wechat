@@ -1,8 +1,9 @@
 import { WeChat_CurrentUserKey } from '../../constants'
-import { MessageInfo, MessageInfoModel } from '../../models/message'
+import { MessageInfo, MessageInfoModel, MessageTypeEnum } from '../../models/message'
 import { UserInfo, UserInfoModel } from '../../models/user'
 import { promptAction } from '@kit.ArkUI'
 import { PopupItem } from '../../models/popup'
+import { AudioRenderer } from '../../utils/audio_render'
 
 @Component
 struct Message {
@@ -17,6 +18,8 @@ struct Message {
   isOwnMessage: boolean = this.currentUser.user_id === this.currentMessage?.sendUser?.user_id
   @State
   showPopup: boolean = false
+  @State
+  audioState: AnimationStatus = AnimationStatus.Initial
   @State
   popupList: PopupItem[] = [{
     title: '听筒播放',
@@ -74,6 +77,91 @@ struct Message {
     })
   }
 
+  @Builder
+  getContent() {
+    if (this.currentMessage.messageType === MessageTypeEnum.TEXT) {
+      this.getTextContent()
+    }
+    if (this.currentMessage.messageType === MessageTypeEnum.AUDIO) {
+      this.getAudioContent()
+    }
+  }
+
+  @Builder
+  getTextContent() {
+    Text(this.currentMessage.messageContent)
+      .backgroundColor(this.isOwnMessage ? $r("app.color.second_primary") : $r("app.color.white"))
+      .fontColor($r("app.color.text_primary"))
+      .padding(10)
+      .margin({
+        left: 10,
+        right: 10
+      })
+      .borderRadius(4)
+  }
+
+  @Builder
+  getAudioContent() {
+    Row() {
+      Text(`${this.currentMessage.sourceDuration}`)
+      // Image($r("app.media.ic_public_recorder"))
+      //   .width(20)
+      //   .height(20)
+      //   .rotate({
+      //     angle: this.isOwnMessage ? 180 : 0
+      //   })
+      ImageAnimator()
+        .images([
+          {
+            src: $r("app.media.ic_public_voice3")
+          },
+          {
+            src: $r("app.media.ic_public_voice1")
+          },
+          {
+            src: $r("app.media.ic_public_voice2")
+          },
+          {
+            src: $r("app.media.ic_public_voice3")
+          }
+        ])
+        .state(this.audioState)
+        .iterations(-1)
+        .width(20)
+        .height(20)
+        .rotate({
+          angle: this.isOwnMessage ? 180 : 0
+        })
+    }
+    .backgroundColor(this.isOwnMessage ? $r('app.color.chat_primary') : $r('app.color.white'))
+    .justifyContent(this.isOwnMessage ? FlexAlign.End : FlexAlign.Start)
+    .height(40)
+    .padding({
+      left: 10,
+      right: 10
+    })
+    .margin({
+      left: 10,
+      right: 10
+    })
+    .borderRadius(4)
+    .width(this.getAudioWidth())
+    .direction(this.isOwnMessage ? Direction.Ltr : Direction.Rtl)
+    .onClick(() => {
+      AudioRenderer.start(this.currentMessage.sourceFilePath, () => {
+        this.audioState = AnimationStatus.Stopped
+      })
+      this.audioState = AnimationStatus.Running
+    })
+  }
+
+  getAudioWidth() {
+    let minW: number = 20; // 百分比
+    let maxW: number = 90; // 最长
+    let calcW: number = minW + 100 * this.currentMessage.sourceDuration / 60;
+    return calcW > maxW ? maxW + '%' : calcW + '%'
+  }
+
   build() {
     Row() {
       Image(this.currentMessage.sendUser.avatar)
@@ -81,23 +169,16 @@ struct Message {
         .aspectRatio(1)
         .borderRadius(4)
       Row() {
-        Text(this.currentMessage.messageContent)
-          .backgroundColor(this.isOwnMessage ? $r("app.color.second_primary") : $r("app.color.white"))
-          .fontColor($r("app.color.text_primary"))
-          .padding(10)
-          .margin({
-            left: 10,
-            right: 10
+        Column() {
+          this.getContent()
+        }.bindPopup(this.showPopup, {
+          builder: this.getPopup,
+          popupColor: $r('app.color.popup_back'),
+          backgroundBlurStyle: BlurStyle.NONE,
+          onStateChange: (e => {
+            this.showPopup = e.isVisible
           })
-          .borderRadius(4)
-          .bindPopup(this.showPopup, {
-            builder: this.getPopup,
-            popupColor: $r('app.color.popup_back'),
-            backgroundBlurStyle: BlurStyle.NONE,
-            onStateChange: (e => {
-              this.showPopup = e.isVisible
-            })
-          })
+        })
 
       }.justifyContent(this.isOwnMessage ? FlexAlign.End : FlexAlign.Start)
       .layoutWeight(6)

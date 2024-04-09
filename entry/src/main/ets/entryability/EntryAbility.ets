@@ -1,4 +1,4 @@
-import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
+import { abilityAccessCtrl, AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { KeyboardAvoidMode, window } from '@kit.ArkUI';
 import { WeChatStore } from '../utils/chat_store';
@@ -6,8 +6,10 @@ import { UserInfoModel } from '../models/user';
 import { WeChat_CurrentUserKey } from '../constants';
 
 export default class EntryAbility extends UIAbility {
-  onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+  async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): Promise<void> {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
+    const mananger = abilityAccessCtrl.createAtManager()
+    await mananger.requestPermissionsFromUser(this.context, ['ohos.permission.MICROPHONE'])
   }
 
   onDestroy(): void {

@@ -6,6 +6,7 @@ import { WeChatStore } from '../../utils/chat_store'
 import Message from '../components/Message'
 import BottomInput from '../components/BottomInput'
 import { requestMessage } from '../../utils/request'
+import { AudioRenderer } from '../../utils/audio_render'
 
 @Entry
 @Component
@@ -27,6 +28,17 @@ struct ChatDetail {
 
   aboutToAppear(): void {
     this.getTalkUser()
+    // 初始化音频
+    AudioRenderer.init()
+  }
+
+  aboutToDisappear(): void {
+    this.releaseAudio()
+  }
+
+  async releaseAudio() {
+    await AudioRenderer.stop()
+    AudioRenderer.release()
   }
 
   async getTalkUser() {
@@ -45,6 +57,12 @@ struct ChatDetail {
     WeChatStore.addOneWeChatMessage(this.talkUser.user_id, message)
     this.scroller.scrollEdge(Edge.Bottom)
     await this.getResponseMessage(content)
+  }
+
+  sendAudioMessage(mess: MessageInfoModel) {
+    this.messList.push(mess)
+    this.scroller.scrollEdge(Edge.Bottom)
+    WeChatStore.addOneWeChatMessage(this.talkUser.user_id, mess)
   }
 
   async getResponseMessage(content: string) {
@@ -119,6 +137,9 @@ struct ChatDetail {
       BottomInput({
         sendTextMessage: (content: string) => {
           this.sendTextMessage(content)
+        },
+        sendAudioMessage: (mess: MessageInfoModel) => {
+          this.sendAudioMessage(mess)
         }
       })
     }

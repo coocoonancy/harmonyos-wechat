@@ -1,6 +1,20 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/coocoonancy/.ohos/config/default_WeChat_qm51frcW_gxZIr0EOB1yADU5ihB278wCh1K9onKwAig=.cer",
+          "storePassword": "0000001B2211D86503D1B37C702A2F87438165F9B0A4AB039899E75FBE8C482DC365477DFCD983A759ABE8",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BF22162F401DD1EF32B4D1D2D1509F49592C893F5620E64E2044D9D136424C6404C6A80F3574A06",
+          "profile": "/Users/coocoonancy/.ohos/config/default_WeChat_qm51frcW_gxZIr0EOB1yADU5ihB278wCh1K9onKwAig=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/coocoonancy/.ohos/config/default_WeChat_qm51frcW_gxZIr0EOB1yADU5ihB278wCh1K9onKwAig=.p12"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",
