@@ -4,6 +4,7 @@ import { UserInfo, UserInfoModel } from '../../models/user'
 import { promptAction } from '@kit.ArkUI'
 import { PopupItem } from '../../models/popup'
 import { AudioRenderer } from '../../utils/audio_render'
+import { FileCommon } from '../../utils/file_operations'
 
 @Component
 struct Message {
@@ -35,6 +36,10 @@ struct Message {
       title: '删除',
       icon: $r("app.media.ic_public_cancel"),
       itemClick: () => {
+        // 删除单条消息时，如果存在临时引用路径则直接删除
+        if (this.currentMessage.sourceFilePath) {
+          FileCommon.delFilePath(this.currentMessage.sourceFilePath)
+        }
         this.delMessage(this.currentMessage.id)
       }
     }, {

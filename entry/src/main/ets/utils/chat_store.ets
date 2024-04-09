@@ -1,10 +1,15 @@
 import { preferences } from '@kit.ArkData'
 import {
   Record_Update_EventName,
-  WeChat_ConnectKey, WeChat_CurrentUserKey, WeChat_StoreKey, WeChat_UserRecordKey } from '../constants'
+  WeChat_ConnectKey,
+  WeChat_CurrentUserKey,
+  WeChat_StoreKey,
+  WeChat_UserRecordKey
+} from '../constants'
 import { MessageInfoModel } from '../models/message'
 import { CurrentUser, DefaultUserList, UserInfoModel } from '../models/user'
 import { emitter } from '@kit.BasicServicesKit'
+import { FileCommon } from './file_operations'
 
 export class WeChatStore {
   static context: Context
@@ -55,6 +60,12 @@ export class WeChatStore {
 
   // 删除“我”和某个人的整个的聊天记录
   static async delWeChatMessage(userId: string) {
+    const list = WeChatStore.getWeChatMessage(userId)
+    list.forEach(item => {
+      if (item.sourceFilePath) {
+        FileCommon.delFilePath(item.sourceFilePath)
+      }
+    })
     preferences.deletePreferences(getContext(), {
       name: `${WeChat_UserRecordKey}_${userId}`
     })

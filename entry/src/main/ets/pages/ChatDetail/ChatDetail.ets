@@ -7,6 +7,7 @@ import Message from '../components/Message'
 import BottomInput from '../components/BottomInput'
 import { requestMessage } from '../../utils/request'
 import { AudioRenderer } from '../../utils/audio_render'
+import { AvPlayer } from '../../utils/av_player'
 
 @Entry
 @Component
@@ -21,6 +22,8 @@ struct ChatDetail {
   messList: MessageInfoModel[] = []
   scroller: Scroller = new Scroller() // 控制消息的滚动条
 
+  player: AvPlayer = new AvPlayer()
+
   getAllRecord() {
     this.messList = WeChatStore.getWeChatMessage(this.talkUser.user_id)
     this.scroller.scrollEdge(Edge.Bottom)
@@ -30,6 +33,7 @@ struct ChatDetail {
     this.getTalkUser()
     // 初始化音频
     AudioRenderer.init()
+    this.player.init()
   }
 
   aboutToDisappear(): void {
@@ -56,6 +60,7 @@ struct ChatDetail {
     this.messList.push(message) // 添加到信息的底部
     WeChatStore.addOneWeChatMessage(this.talkUser.user_id, message)
     this.scroller.scrollEdge(Edge.Bottom)
+    this.player.play('send.wav')
     await this.getResponseMessage(content)
   }
 
@@ -63,6 +68,7 @@ struct ChatDetail {
     this.messList.push(mess)
     this.scroller.scrollEdge(Edge.Bottom)
     WeChatStore.addOneWeChatMessage(this.talkUser.user_id, mess)
+    this.player.play('send.wav')
   }
 
   async getResponseMessage(content: string) {
