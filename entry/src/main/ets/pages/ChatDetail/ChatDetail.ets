@@ -1,13 +1,14 @@
 import { WeChat_CurrentUserKey } from '../../constants'
 import { UserInfo, UserInfoModel } from '../../models/user'
 import { router } from '@kit.ArkUI'
-import { MessageInfo, MessageInfoModel } from '../../models/message'
+import { MessageInfo, MessageInfoModel, MessageTypeEnum } from '../../models/message'
 import { WeChatStore } from '../../utils/chat_store'
 import Message from '../components/Message'
 import BottomInput from '../components/BottomInput'
 import { requestMessage } from '../../utils/request'
 import { AudioRenderer } from '../../utils/audio_render'
 import { AvPlayer } from '../../utils/av_player'
+import PreviewDialog from '../components/PreviewDialog'
 
 @Entry
 @Component
@@ -21,8 +22,17 @@ struct ChatDetail {
   @State
   messList: MessageInfoModel[] = []
   scroller: Scroller = new Scroller() // 控制消息的滚动条
-
   player: AvPlayer = new AvPlayer()
+  previewUrl: string = ''
+  mediaType: MessageTypeEnum = MessageTypeEnum.IMAGE
+  previewController: CustomDialogController = new CustomDialogController({
+    builder: PreviewDialog({
+      url: this.previewUrl,
+      mediaType: this.mediaType
+    }),
+    autoCancel: true,
+    customStyle: true
+  })
 
   getAllRecord() {
     this.messList = WeChatStore.getWeChatMessage(this.talkUser.user_id)
@@ -64,10 +74,21 @@ struct ChatDetail {
     await this.getResponseMessage(content)
   }
 
+  // 发送语音
   sendAudioMessage(mess: MessageInfoModel) {
     this.messList.push(mess)
     this.scroller.scrollEdge(Edge.Bottom)
     WeChatStore.addOneWeChatMessage(this.talkUser.user_id, mess)
+    this.player.play('send.wav')
+  }
+
+  // 发送图片
+  sendImageMessage(list: MessageInfoModel[]) {
+    this.messList.push(...list) // 将两个数组合并
+    this.scroller.scrollEdge(Edge.Bottom) // 滚动到底部
+    list.forEach(item => {
+      WeChatStore.addOneWeChatMessage(this.talkUser.user_id, item) // 添加聊天记录
+    })
     this.player.play('send.wav')
   }
 
@@ -124,6 +145,11 @@ struct ChatDetail {
             Message({
               currentMessage: item, delMessage: () => {
                 this.delMessage(item.id)
+              },
+              previewImage: () => {
+                this.previewUrl = 'file://' + item.sourceFilePath
+                this.mediaType = item.messageType
+                this.previewController.open()
               }
             })
           }
@@ -146,6 +172,9 @@ struct ChatDetail {
         },
         sendAudioMessage: (mess: MessageInfoModel) => {
           this.sendAudioMessage(mess)
+        },
+        sendImageMessage: (list: MessageInfoModel[]) => {
+          this.sendImageMessage(list) // 调用自身的发消息的方法
         }
       })
     }

@@ -5,13 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "/Users/coocoonancy/.ohos/config/default_WeChat_qm51frcW_gxZIr0EOB1yADU5ihB278wCh1K9onKwAig=.cer",
-          "storePassword": "0000001B2211D86503D1B37C702A2F87438165F9B0A4AB039899E75FBE8C482DC365477DFCD983A759ABE8",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001BF22162F401DD1EF32B4D1D2D1509F49592C893F5620E64E2044D9D136424C6404C6A80F3574A06",
-          "profile": "/Users/coocoonancy/.ohos/config/default_WeChat_qm51frcW_gxZIr0EOB1yADU5ihB278wCh1K9onKwAig=.p7b",
+          "storePassword": "0000001BC5201DEEAF5F88931AA6E3AB7F3D791D72784EE2AABC2B3DC053B4867BF694ED556B76DFADABEC",
+          "certpath": "/Users/coocoonancy/harmonyos/harmonyos_docs/coocoonancy_harmonyos_wechat.cer",
+          "keyAlias": "coocoonancy_harmonyos_wechat_p12",
+          "keyPassword": "0000001B9580C02D6C0E6AAB8BCF075D5C52B875B211FF7301582706B6B4575386A890D609D095B8777F15",
+          "profile": "/Users/coocoonancy/harmonyos/harmonyos_docs/coocoonacy_harmonyos_wechat_deployRelease.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/coocoonancy/.ohos/config/default_WeChat_qm51frcW_gxZIr0EOB1yADU5ihB278wCh1K9onKwAig=.p12"
+          "storeFile": "/Users/coocoonancy/harmonyos/harmonyos_docs/coocoonancy_harmonyos_wechat.p12"
         }
       }
     ],

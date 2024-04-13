@@ -10,6 +10,9 @@ import { FileCommon } from '../../utils/file_operations'
 struct Message {
   delMessage: (messId: string) => void = () => {
   }
+  previewImage: () => void = () => {
+  }
+  videoController: VideoController = new VideoController()
   @StorageProp(WeChat_CurrentUserKey)
   currentUser: UserInfoModel = new UserInfoModel({} as UserInfo)
   @Require
@@ -90,6 +93,12 @@ struct Message {
     if (this.currentMessage.messageType === MessageTypeEnum.AUDIO) {
       this.getAudioContent()
     }
+    if (this.currentMessage.messageType === MessageTypeEnum.IMAGE) {
+      this.getImageContent()
+    }
+    if (this.currentMessage.messageType === MessageTypeEnum.VIDEO) {
+      this.getVideoContent()
+    }
   }
 
   @Builder
@@ -165,6 +174,35 @@ struct Message {
     let maxW: number = 90; // 最长
     let calcW: number = minW + 100 * this.currentMessage.sourceDuration / 60;
     return calcW > maxW ? maxW + '%' : calcW + '%'
+  }
+
+  // 获取图片显示
+  @Builder
+  getImageContent() {
+    Column() {
+      Image("file://" + this.currentMessage.sourceFilePath)
+        .borderRadius(4)
+        .width('100%')
+        .enabled(false)
+    }
+    .width('40%')
+    .margin({
+      left: 10,
+      right: 10
+    }).onClick(() => {
+      this.previewImage()
+    })
+
+  }
+
+  @Builder
+  getVideoContent() {
+    Stack() {
+      Video({
+        src: 'file://' + this.currentMessage.sourceFilePath,
+        controller: this.videoController
+      })
+    }
   }
 
   build() {

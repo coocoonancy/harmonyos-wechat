@@ -8,6 +8,9 @@ import { UserInfo, UserInfoModel } from '../../models/user'
 import { WeChat_CurrentUserKey } from '../../constants'
 import { MessageInfo, MessageInfoModel, MessageTypeEnum } from '../../models/message'
 import { PopupItem } from '../../models/popup'
+import { camera, cameraPicker } from '@kit.CameraKit'
+import { fileIo, picker } from '@kit.CoreFileKit'
+import { util } from '@kit.ArkTS'
 
 @Preview
 @Component
@@ -26,6 +29,9 @@ struct BottomInput {
   // 发送语音
   sendAudioMessage: (mess: MessageInfoModel) => void = () => {
   }
+  // 发送图片
+  sendImageMessage: (list: MessageInfoModel[]) => void = () => {
+  }
   @State
   showVoiceCom: boolean = false
   tempAudioPath: string = ''
@@ -42,10 +48,15 @@ struct BottomInput {
   bottomList: PopupItem[] = [{
     icon: $r('app.media.ic_public_photo'),
     title: '照片',
+    itemClick: () => {
+      this.sendPhoto()
+    }
   }, {
     icon: $r('app.media.ic_public_carema'),
     title: '拍摄',
-
+    itemClick: () => {
+      this.openCamera()
+    }
   }, {
     icon: $r('app.media.ic_statusbar_gps'),
     title: '位置',
@@ -144,6 +155,8 @@ struct BottomInput {
     if (this.voiceState === VoiceRecordEnum.Cancel) {
       // 如果松手时，是取消状态 不管录的语音怎么样 直接删除
       FileCommon.delFilePath(this.tempAudioPath) // 删除路径
+      // 当松手时，取消状态直接设置时长为0
+      this.duration = 0
     } else if (this.voiceState === VoiceRecordEnum.Transfer) {
       // 如果是转化文本类
     }
@@ -184,6 +197,73 @@ struct BottomInput {
     this.sendAudioMessage(mess)
     this.tempAudioPath = "" // 清空临时路径
     this.duration = 0 // 时长归零
+  }
+
+  async openCamera() {
+    const result = await cameraPicker.pick(getContext(), [
+      cameraPicker.PickerMediaType.PHOTO,
+      cameraPicker.PickerMediaType.VIDEO
+    ], {
+      cameraPosition: camera.CameraPosition.CAMERA_POSITION_BACK // 后置摄像头
+    })
+    const filePath = getContext().filesDir + "/" + util.generateRandomUUID() + '.'
+    let extendName = "jpg"
+    const file = fileIo.openSync(result.resultUri, fileIo.OpenMode.READ_ONLY)
+    let messType = MessageTypeEnum.IMAGE
+    let messContent = "[图片]"
+    promptAction.showToast({ message: 'video ' + JSON.stringify(result) })
+    if (result.mediaType === "video") {
+      // 奇葩bug
+      extendName = "mp4" // 文件类型
+      messType = MessageTypeEnum.VIDEO
+      messContent = "视频"
+    }
+    fileIo.copyFileSync(file.fd, filePath + extendName) // 拷贝
+    fileIo.closeSync(file.fd)
+    this.sendImageMessage([new MessageInfoModel({
+      connectUser: this.talkUser,
+      sendUser: this.currentUser,
+      sourceFilePath: filePath + extendName, // 图片来源
+      messageType: messType,
+      messageContent: messContent
+    } as MessageInfo)])
+    // 关闭底部
+    animateTo({ duration: 150 }, () => {
+      this.showBottomCard = false
+    })
+  }
+
+  // 发送图片
+  async sendPhoto() {
+    const photo = new picker.PhotoViewPicker()
+    const result = await photo.select({
+      maxSelectNumber: 9,
+      MIMEType: picker.PhotoViewMIMETypes.IMAGE_TYPE
+    })
+    if (result.photoUris.length) {
+      let messList: MessageInfoModel[] = []
+      result.photoUris.forEach(item => {
+        // 相册的文件对象
+        const file = fileIo.openSync(item, fileIo.OpenMode.READ_ONLY)
+        // 保存的沙箱的路径
+        const filePath = getContext().filesDir + '/' + util.generateRandomUUID() + '.jpg'
+        // 将相册内容拷贝到沙箱目录
+        fileIo.copyFileSync(file.fd, filePath)
+        // 发了一张照片 一条消息
+        messList.push(new MessageInfoModel({
+          connectUser: this.talkUser,
+          sendUser: this.currentUser,
+          sourceFilePath: filePath, // 图片来源
+          messageType: MessageTypeEnum.IMAGE,
+          messageContent: "[图片]"
+        } as MessageInfo))
+        fileIo.closeSync(file.fd) // 关闭相册的读取
+        this.sendImageMessage(messList)
+        animateTo({ duration: 150 }, () => {
+          this.showBottomCard = false
+        })
+      })
+    }
   }
 
   @Builder
