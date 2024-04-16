@@ -5,6 +5,7 @@ import { promptAction } from '@kit.ArkUI'
 import { PopupItem } from '../../models/popup'
 import { AudioRenderer } from '../../utils/audio_render'
 import { FileCommon } from '../../utils/file_operations'
+import { VoiceTransfer } from '../../utils/vioce_transfer'
 
 @Component
 struct Message {
@@ -25,6 +26,8 @@ struct Message {
   @State
   audioState: AnimationStatus = AnimationStatus.Initial
   @State
+  transferResult: string = ''
+  @State
   popupList: PopupItem[] = [{
     title: '听筒播放',
     icon: $r("app.media.ic_public_ears")
@@ -34,7 +37,15 @@ struct Message {
       icon: $r("app.media.ic_public_cube")
     }, {
       title: '转文字',
-      icon: $r("app.media.ic_public_trans_text")
+      icon: $r("app.media.ic_public_trans_text"),
+      itemClick: () => {
+        if (this.currentMessage.messageType === MessageTypeEnum.AUDIO) {
+          VoiceTransfer.voiceToText(this.currentMessage.sourceFilePath, (res) => {
+            this.transferResult = res.result
+          })
+        }
+        this.showPopup = false
+      }
     }, {
       title: '删除',
       icon: $r("app.media.ic_public_cancel"),
@@ -116,57 +127,76 @@ struct Message {
 
   @Builder
   getAudioContent() {
-    Row() {
-      Text(`${this.currentMessage.sourceDuration}`)
-      // Image($r("app.media.ic_public_recorder"))
-      //   .width(20)
-      //   .height(20)
-      //   .rotate({
-      //     angle: this.isOwnMessage ? 180 : 0
-      //   })
-      ImageAnimator()
-        .images([
-          {
-            src: $r("app.media.ic_public_voice3")
-          },
-          {
-            src: $r("app.media.ic_public_voice1")
-          },
-          {
-            src: $r("app.media.ic_public_voice2")
-          },
-          {
-            src: $r("app.media.ic_public_voice3")
-          }
-        ])
-        .state(this.audioState)
-        .iterations(-1)
-        .width(20)
-        .height(20)
-        .rotate({
-          angle: this.isOwnMessage ? 180 : 0
-        })
-    }
-    .backgroundColor(this.isOwnMessage ? $r('app.color.chat_primary') : $r('app.color.white'))
-    .justifyContent(this.isOwnMessage ? FlexAlign.End : FlexAlign.Start)
-    .height(40)
-    .padding({
-      left: 10,
-      right: 10
-    })
-    .margin({
-      left: 10,
-      right: 10
-    })
-    .borderRadius(4)
-    .width(this.getAudioWidth())
-    .direction(this.isOwnMessage ? Direction.Ltr : Direction.Rtl)
-    .onClick(() => {
-      AudioRenderer.start(this.currentMessage.sourceFilePath, () => {
-        this.audioState = AnimationStatus.Stopped
+    Column() {
+      Row() {
+        Text(`${this.currentMessage.sourceDuration}`)
+        // Image($r("app.media.ic_public_recorder"))
+        //   .width(20)
+        //   .height(20)
+        //   .rotate({
+        //     angle: this.isOwnMessage ? 180 : 0
+        //   })
+        ImageAnimator()
+          .images([
+            {
+              src: $r("app.media.ic_public_voice3")
+            },
+            {
+              src: $r("app.media.ic_public_voice1")
+            },
+            {
+              src: $r("app.media.ic_public_voice2")
+            },
+            {
+              src: $r("app.media.ic_public_voice3")
+            }
+          ])
+          .state(this.audioState)
+          .iterations(-1)
+          .width(20)
+          .height(20)
+          .rotate({
+            angle: this.isOwnMessage ? 180 : 0
+          })
+      }
+      .backgroundColor(this.isOwnMessage ? $r('app.color.chat_primary') : $r('app.color.white'))
+      .justifyContent(this.isOwnMessage ? FlexAlign.End : FlexAlign.Start)
+      .height(40)
+      .padding({
+        left: 10,
+        right: 10
       })
-      this.audioState = AnimationStatus.Running
-    })
+      .margin({
+        left: 10,
+        right: 10
+      })
+      .borderRadius(4)
+      .width(this.getAudioWidth())
+      .direction(this.isOwnMessage ? Direction.Ltr : Direction.Rtl)
+      .onClick(() => {
+        AudioRenderer.start(this.currentMessage.sourceFilePath, () => {
+          this.audioState = AnimationStatus.Stopped
+        })
+        this.audioState = AnimationStatus.Running
+      })
+
+      if (this.transferResult) {
+        if (this.transferResult) {
+          Text(this.transferResult)
+            .backgroundColor(this.isOwnMessage ? $r('app.color.second_primary') : $r('app.color.white'))
+            .fontColor($r('app.color.text_primary'))
+            .padding(10)
+            .lineHeight(24)
+            .margin({
+              left: 10,
+              right: 10
+            })
+            .borderRadius(5)
+        }
+      }
+    }
+    .alignItems(this.isOwnMessage ? HorizontalAlign.End : HorizontalAlign.Start)
+
   }
 
   getAudioWidth() {

@@ -9,6 +9,7 @@ import { requestMessage } from '../../utils/request'
 import { AudioRenderer } from '../../utils/audio_render'
 import { AvPlayer } from '../../utils/av_player'
 import PreviewDialog from '../components/PreviewDialog'
+import { VoiceTransfer } from '../../utils/vioce_transfer'
 
 @Entry
 @Component
@@ -104,6 +105,7 @@ struct ChatDetail {
     WeChatStore.addOneWeChatMessage(this.talkUser.user_id, message)
     this.talkUserInputIng = false
     this.scroller.scrollEdge(Edge.Bottom)
+    VoiceTransfer.textToVoice(result?.data?.info?.text)
   }
 
   delMessage(messId: string) {

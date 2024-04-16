@@ -9,7 +9,7 @@ export default class EntryAbility extends UIAbility {
   async onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): Promise<void> {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
     const mananger = abilityAccessCtrl.createAtManager()
-    await mananger.requestPermissionsFromUser(this.context, ['ohos.permission.MICROPHONE'])
+    await mananger.requestPermissionsFromUser(this.context, ['ohos.permission.MICROPHONE', 'ohos.permission.LOCATION', 'ohos.permission.APPROXIMATELY_LOCATION'])
   }
 
   onDestroy(): void {

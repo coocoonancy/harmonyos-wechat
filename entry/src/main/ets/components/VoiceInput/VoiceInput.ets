@@ -1,9 +1,54 @@
 import { VoiceRecordEnum } from '../../models/voice'
+import { emitter } from '@kit.BasicServicesKit'
 
 @Component
 struct VoiceInput {
   @Consume
   voiceState: VoiceRecordEnum
+  @Consume
+  asrResult: string
+  @State
+  list: number[] = []
+
+  aboutToAppear(): void {
+    emitter.on('onBuffer', res => {
+      this.calcHeight(res.data!.buffer as ArrayBuffer)
+    })
+  }
+
+  aboutToDisappear(): void {
+    emitter.off('onBuffer')
+  }
+
+  // 算出20个高度给list
+  calcHeight(buffer: ArrayBuffer) {
+    try {
+      // 计算每个均分区间的大小
+      const sampleSize = Math.floor(buffer.byteLength / 30);
+      const view = new DataView(buffer);
+      const amplitudes: number[] = [];
+      // 遍历缓冲区，计算每个样本的振幅并转换为高度
+      // 遍历原始缓冲区，提取每个均分区间的振幅
+      for (let i = 0; i < buffer.byteLength; i += sampleSize) {
+        let sum = 0;
+        // 计算当前均分区间内所有振幅的平均值
+        // 假设每个样本占据 2 字节
+        for (let j = i; j < i + sampleSize; j += 2) {
+          const sample = view.getInt16(j, true);
+          sum += Math.abs(sample);
+        }
+        // 假设每个样本占据 2 字节
+        const averageAmplitude = 150 * sum / (sampleSize / 2) / 32767;
+        amplitudes.push(averageAmplitude < 10 ? 10 : averageAmplitude);
+        animateTo({ duration: 100 }, () => {
+          this.list = amplitudes
+        })
+      }
+    } catch (e) {
+      AlertDialog.show({ message: e.message })
+    }
+
+  }
 
   @Builder
   getDisplayContent() {
@@ -22,7 +67,14 @@ struct VoiceInput {
     }
     else if (this.voiceState === VoiceRecordEnum.RecordIng) {
       // 正在录音
-      Row() {
+      Row({ space: 2 }) {
+        ForEach(this.list, (height: number) => {
+          Row()
+            .height(height)
+            .width(2)
+            .borderRadius(1)
+            .backgroundColor($r("app.color.animate_voice_color"))
+        })
 
       }
       .width(180)
@@ -33,7 +85,9 @@ struct VoiceInput {
     else if (this.voiceState === VoiceRecordEnum.Transfer) {
       // 转化文本
       Row() {
-
+        Text(this.asrResult)
+          .fontSize(20)
+          .fontColor($r("app.color.text_primary"))
       }
       .width(280)
       .height(120)

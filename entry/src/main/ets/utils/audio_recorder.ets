@@ -10,7 +10,7 @@ export class AudioRecorder {
   static audioCapture: audio.AudioCapturer
   // 采样配置
   static audioStreamInfo: audio.AudioStreamInfo = {
-    samplingRate: audio.AudioSamplingRate.SAMPLE_RATE_44100,
+    samplingRate: audio.AudioSamplingRate.SAMPLE_RATE_16000,
     channels: audio.AudioChannel.CHANNEL_1,
     sampleFormat: audio.AudioSampleFormat.SAMPLE_FORMAT_S16LE,
     encodingType: audio.AudioEncodingType.ENCODING_TYPE_RAW
@@ -56,13 +56,15 @@ export class AudioRecorder {
         const size = await AudioRecorder.audioCapture.getBufferSize()
         // 当前录音的一段内容
         const buffer = await AudioRecorder.audioCapture.read(size, true)
-        const options: FileOptions = {
-          // 偏移量
-          offset: bufferSize,
-          length: buffer.byteLength
-        };
-        fileIo.writeSync(fd, buffer, options)
-        bufferSize += buffer.byteLength
+        if (buffer) {
+          const options: FileOptions = {
+            // 偏移量
+            offset: bufferSize,
+            length: buffer.byteLength
+          };
+          fileIo.writeSync(fd, buffer, options)
+          bufferSize += buffer.byteLength
+        }
       }
     }
     catch (error) {

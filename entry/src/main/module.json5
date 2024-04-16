@@ -22,6 +22,26 @@
           ],
           "when": "always"
         }
+      },
+      {
+        "name": "ohos.permission.LOCATION",
+        "reason": "$string:LOCATION_REASON",
+        "usedScene": {
+          "abilities": [
+            "EntryAbility"
+          ],
+          "when": "always"
+        }
+      },
+      {
+        "name": "ohos.permission.APPROXIMATELY_LOCATION",
+        "reason": "$string:LOCATION_REASON",
+        "usedScene": {
+          "abilities": [
+            "EntryAbility"
+          ],
+          "when": "always"
+        }
       }
     ],
     "deliveryWithInstall": true,
@@ -48,6 +68,12 @@
           }
         ]
       }
-    ]
+    ],
+    "metadata": [
+      {
+        "name": "client_id",
+        "value": "110760367"
+      }
+    ],
   }
 }

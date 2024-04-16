@@ -5,13 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "storePassword": "0000001BC5201DEEAF5F88931AA6E3AB7F3D791D72784EE2AABC2B3DC053B4867BF694ED556B76DFADABEC",
-          "certpath": "/Users/coocoonancy/harmonyos/harmonyos_docs/coocoonancy_harmonyos_wechat.cer",
-          "keyAlias": "coocoonancy_harmonyos_wechat_p12",
-          "keyPassword": "0000001B9580C02D6C0E6AAB8BCF075D5C52B875B211FF7301582706B6B4575386A890D609D095B8777F15",
-          "profile": "/Users/coocoonancy/harmonyos/harmonyos_docs/coocoonacy_harmonyos_wechat_deployRelease.p7b",
+          "storePassword": "0000001B0C6E9B270B1BDDC4E80594DC4F696BC33B327E9728D877232CB260669E46655A3F70891575E263",
+          "certpath": "/Users/coocoonancy/harmonyos/harmonyos_docs/coocoonancy_wechat.cer",
+          "keyAlias": "coocoonancy_wechat",
+          "keyPassword": "0000001B4CA97D84AE66DBEBD944960806E2836ACECACEB9FFEAFEC3D26B17AEF91B4E361E4C0541BD1054",
+          "profile": "/Users/coocoonancy/harmonyos/harmonyos_docs/coocoonancy_wechatDebug.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/coocoonancy/harmonyos/harmonyos_docs/coocoonancy_harmonyos_wechat.p12"
+          "storeFile": "/Users/coocoonancy/harmonyos/harmonyos_docs/coocoonancy_wechat.p12"
         }
       }
     ],

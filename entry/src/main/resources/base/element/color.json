@@ -83,6 +83,10 @@
     {
       "name": "pay_back",
       "value": "#57ab70"
+    },
+    {
+      "name": "login_background",
+      "value": "#F1F3F5"
     }
   ]
 }

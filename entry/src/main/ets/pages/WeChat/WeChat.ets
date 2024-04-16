@@ -3,11 +3,40 @@ import { router } from '@kit.ArkUI';
 import { WeChatStore } from '../../utils/chat_store';
 import { emitter } from '@kit.BasicServicesKit';
 import { Record_Update_EventName } from '../../constants';
+import { PopupItem } from '../../models/popup';
+import { scanBarcode, scanCore } from '@kit.ScanKit';
 
 @Entry
 @Component
 struct WeChat {
   @State list: MessageInfoModel[] = []
+  @State dropShow: boolean = false
+  @State popList: PopupItem[] = [
+    {
+      title: '发起群聊',
+      icon: $r('app.media.ic_public_message')
+    },
+    {
+      title: '添加朋友',
+      icon: $r('app.media.ic_public_add_friend')
+    },
+    {
+      title: '扫一扫',
+      icon: $r('app.media.ic_public_scan'),
+      itemClick: () => {
+        this.scanCode()
+      }
+    },
+    {
+      title: '收付款',
+      icon: $r('app.media.ic_public_receive'),
+      itemClick: () => {
+        router.pushUrl({
+          url: 'pages/PayQrCode/PayQrCode'
+        })
+      }
+    }
+  ]
 
   aboutToAppear(): void {
     this.getAllRecord()
@@ -32,6 +61,17 @@ struct WeChat {
         .padStart(2, "0") + "日"
     }
   }
+
+
+  async scanCode() {
+    const res = await scanBarcode.startScanForResult(getContext(), {
+      scanTypes: [scanCore.ScanType.ALL],
+      enableMultiMode: true,
+      enableAlbum: true
+    })
+    AlertDialog.show({ message: res.originalValue })
+  }
+
 
   @Builder
   getEnd(userId: string) {
@@ -59,10 +99,63 @@ struct WeChat {
     .backgroundColor($r('app.color.danger'))
   }
 
+  @Builder
+  getDrop() {
+    Column() {
+      ForEach(this.popList, (item: PopupItem) => {
+        Row({ space: 5 }) {
+          Image(item.icon)
+            .fillColor($r('app.color.white'))
+            .width(20)
+            .height(20)
+          Text(item.title)
+            .fontColor(Color.White)
+            .layoutWeight(1)
+            .textAlign(TextAlign.Center)
+        }
+        .width('100%')
+        .height(48)
+        .justifyContent(FlexAlign.Center)
+        .padding({
+          left: 10,
+          right: 10
+        })
+        .onClick(() => {
+          item.itemClick && item.itemClick()
+        })
+
+      })
+    }
+    .width(120)
+  }
+
   build() {
     Column() {
       Row() {
         Text('微信')
+        Image($r('app.media.ic_public_add_norm'))
+          .width(20)
+          .height(20)
+          .fillColor($r('app.color.text_primary'))
+          .position({
+            x: '100%'
+          })
+          .translate({
+            x: -40,
+            y: 15
+          })
+          .bindPopup(this.dropShow, {
+            builder: this.getDrop,
+            placement: Placement.Bottom,
+            onStateChange: (event) => {
+              this.dropShow = event.isVisible
+            },
+            popupColor: $r("app.color.popup_back"),
+            backgroundBlurStyle: BlurStyle.NONE
+          })
+          .onClick(() => {
+            this.dropShow = true
+          })
       }
       .justifyContent(FlexAlign.Center)
       .width('100%')
